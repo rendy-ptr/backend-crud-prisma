@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/app.js",
-    "format": "npx prettier --write ."
+    "format": "npx prettier --write .",
+    "postinstall": "npx prisma generate"
   },
   "keywords": [],
   "author": "",

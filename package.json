@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/app.js",
     "format": "npx prettier --write .",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "migrate": "npx prisma migrate dev --name init"
   },
   "keywords": [],
   "author": "",

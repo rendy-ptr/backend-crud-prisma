@@ -6,24 +6,31 @@ const prisma = new PrismaClient();
 const createUsers = async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    const hashedPassword = bcrypt.hash(password, saltRounds);
-    const prismaGetUsers = await prisma.user.findMany();
-    const checkEmail = prismaGetUsers.find((user) => user.email === email);
-    if (checkEmail) {
-      return res.status(400).json({
-        message: "Email already exists",
+    bcrypt.hash(password, saltRounds, async (err, hash) => {
+      if (err) {
+        return res.status(400).json({
+          message: "There was an error creating the hash password",
+          error: err.message,
+        });
+      }
+      const prismaGetUsers = await prisma.user.findMany();
+      const checkEmail = prismaGetUsers.find((user) => user.email === email);
+      if (checkEmail) {
+        return res.status(400).json({
+          message: "Email already exists",
+        });
+      }
+      const prismaUser = await prisma.user.create({
+        data: {
+          username,
+          email,
+          password: hash,
+        },
       });
-    }
-    const prismaUser = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashedPassword,
-      },
-    });
-    res.status(200).json({
-      message: "Success Create",
-      data: prismaUser,
+      res.status(200).json({
+        message: "Success Create",
+        data: prismaUser,
+      });
     });
   } catch (error) {
     res.status(400).json({

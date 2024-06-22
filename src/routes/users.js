@@ -1,4 +1,5 @@
 const express = require("express");
+const { verifyToken, isAdmin } = require("../middleware/authJwt");
 
 const userRouter = express.Router();
 
@@ -10,7 +11,7 @@ const {
   loginUsers,
 } = require("../controllers/users");
 
-userRouter.get("/data-users", getUsers);
+userRouter.get("/data-users", verifyToken, isAdmin, getUsers);
 userRouter.patch("/update-user/:id", updateUser);
 userRouter.delete("/delete-user/:id", deleteUser);
 

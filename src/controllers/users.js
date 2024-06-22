@@ -1,5 +1,10 @@
+const path = require("path");
+require("dotenv").config({
+  path: path.resolve(__dirname, "../.env"),
+});
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const saltRounds = 10;
 const prisma = new PrismaClient();
 
@@ -117,15 +122,35 @@ const loginUsers = async (req, res) => {
         email: email,
       },
     });
-    const validatePassword = bcrypt.compare(password, prismaLoginUser.password);
-    if (!validatePassword) {
-      res.status(400).json({
-        message: "Password is incorrect",
+    bcrypt.compare(password, prismaLoginUser.password, (err, result) => {
+      if (err) {
+        return res.status(400).json({
+          message: "There was an error comparing the password",
+          error: err.message,
+        });
+      }
+      if (!result) {
+        return res.status(400).json({
+          message: "Password is incorrect",
+        });
+      }
+      const secretKey = process.env.JWT_SECRET_SAYA;
+      const token = jwt.sign(
+        {
+          id: prismaLoginUser.id,
+          email: prismaLoginUser.email,
+          role: prismaLoginUser.role,
+        },
+        secretKey,
+        { expiresIn: "1h" },
+      );
+      res.status(200).json({
+        message: "Success Login",
+        data: {
+          prismaLoginUser,
+        },
+        token: token,
       });
-    }
-    res.status(200).json({
-      message: "Success Login",
-      data: prismaLoginUser,
     });
   } catch (error) {
     res.status(400).json({
